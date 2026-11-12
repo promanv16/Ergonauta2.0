@@ -1,0 +1,615 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ergonauta D'mocca</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: barra superior con estado As Is / To Be, escena lateral del puesto a la izquierda, resultados a la derecha, controles bajo la escena. */
+:root{
+  --bg:#f1f4f5; --surface:#ffffff; --surface2:#e8eef0; --ink:#15262c; --muted:#55696f; --line:#d3dde0;
+  --accent:#0a6a7d; --accent-ink:#ffffff; --accent-soft:#d6eef2;
+  --ok:#1b8a5a; --warn:#b97d05; --bad:#c43a2c;
+  --ok-soft:#dcf1e6; --warn-soft:#f8ecc9; --bad-soft:#f7dcd8;
+  --steel:#b3bfc4; --steel-dark:#8b999f; --scene:#f9fbfb;
+  --font-display:"Space Grotesk",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e171b; --surface:#16242a; --surface2:#1e3038; --ink:#e5eef1; --muted:#93a9b1; --line:#2a3f47;
+  --accent:#4cc2d6; --accent-ink:#06242b; --accent-soft:#17414b;
+  --ok:#47c58d; --warn:#e2b43f; --bad:#f07162;
+  --ok-soft:#173a2c; --warn-soft:#3b3216; --bad-soft:#44201c;
+  --steel:#4b5d64; --steel-dark:#6c8089; --scene:#122025; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171b; --surface:#16242a; --surface2:#1e3038; --ink:#e5eef1; --muted:#93a9b1; --line:#2a3f47;
+  --accent:#4cc2d6; --accent-ink:#06242b; --accent-soft:#17414b;
+  --ok:#47c58d; --warn:#e2b43f; --bad:#f07162;
+  --ok-soft:#173a2c; --warn-soft:#3b3216; --bad-soft:#44201c;
+  --steel:#4b5d64; --steel-dark:#6c8089; --scene:#122025; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.5;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:28px;line-height:1.1}
+h2{font-size:17px}
+h3{font-size:14px}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.top p{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:600}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px}
+.seg button,.tabs button,.chip,.btn{font:inherit;cursor:pointer;border:0;color:var(--ink)}
+.seg button{background:transparent;padding:8px 14px;border-radius:8px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:transparent;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{background:var(--surface2);padding:7px 11px;border-radius:999px;font-size:13px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+svg.scene{width:100%;height:auto;display:block;background:var(--scene);border-radius:8px;border:1px solid var(--line)}
+.lbl{font-family:var(--font-body);font-size:11px;fill:var(--muted)}
+.lblb{font-family:var(--font-mono);font-size:11px;fill:var(--ink)}
+.joints{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+@media(max-width:520px){.joints{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.joint{background:var(--surface2);border-radius:8px;padding:8px 10px}
+.joint small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.joint b{font-family:var(--font-mono);font-size:18px;font-weight:500}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--muted)}
+.ok{--c:var(--ok)}.warn{--c:var(--warn)}.bad{--c:var(--bad)}
+.dot.ok,.dot.warn,.dot.bad{background:var(--c)}
+.verdict{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px}
+.verdict.ok{background:var(--ok-soft)}.verdict.warn{background:var(--warn-soft)}.verdict.bad{background:var(--bad-soft)}
+.verdict .dot{margin-top:6px;flex:none}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+@media(max-width:620px){.controls{grid-template-columns:minmax(0,1fr)}}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-weight:500;font-size:13px}
+.ctl label span{font-family:var(--font-mono);color:var(--accent);font-weight:500}
+.ctl small{display:block;color:var(--muted);font-size:12px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:4px 0 0}
+.toggles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:620px){.toggles{grid-template-columns:minmax(0,1fr)}}
+.tg{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--surface)}
+.tg input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex:none}
+.tg b{display:block;font-weight:600;font-size:13px}
+.tg small{color:var(--muted);font-size:12px;line-height:1.35;display:block}
+.tg:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.tile small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.tile b{font-family:var(--font-display);font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile i{font-style:normal;font-size:12px;color:var(--muted)}
+.risk{display:grid;grid-template-columns:34px minmax(0,1fr) 44px;gap:4px 10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.risk:first-child{border-top:0}
+.risk .id{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.risk .nm{font-size:13px;line-height:1.3}
+.risk .sc{font-family:var(--font-mono);font-weight:500;text-align:right;color:var(--c)}
+.bar{grid-column:2/4;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:3px;transition:width .25s}
+.delta{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.tbars{display:flex;flex-direction:column;gap:6px}
+.tb{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 28px;gap:8px;align-items:center;font-size:13px}
+.tb .bar{grid-column:auto}
+.tb b{font-family:var(--font-mono);font-weight:500;text-align:right}
+.note{color:var(--muted);font-size:12px;margin:8px 0 0}
+.btn{background:var(--accent);color:var(--accent-ink);padding:9px 16px;border-radius:8px;font-weight:600}
+.btn.alt{background:var(--surface2);color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ring{width:140px;height:140px;position:relative;flex:none}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-mono);font-size:32px;font-weight:500}
+.exlist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.exlist li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.exlist li[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.exlist .n{font-family:var(--font-mono);color:var(--muted)}
+.exlist .z{font-size:12px;color:var(--muted)}
+.s5{display:grid;gap:12px}
+.s5 h3 span{font-weight:400;color:var(--muted)}
+.meter{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.foot{color:var(--muted);font-size:12px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">D'mocca Cake · Gemba de producción · Rollos de canela</div>
+      <h1>Ergonauta</h1>
+      <p>Maniquí ergonómico del puesto de Carmen. Cambia la altura de la mesa, el alcance, el estante y las mejoras 5S, y mira cómo cambian la postura, los riesgos y la fatiga del turno.</p>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Escenario">
+        <button id="pAs" aria-pressed="true">As Is (hoy)</button>
+        <button id="pTo" aria-pressed="false">To Be (propuesta)</button>
+      </div>
+      <button class="btn alt" id="themeBtn" aria-label="Cambiar tema">Tema</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t1" aria-selected="true">Simulador</button>
+    <button role="tab" id="t2" aria-selected="false">Pausas activas</button>
+    <button role="tab" id="t3" aria-selected="false">Auditoría 5S</button>
+  </nav>
+
+  <section id="v1" class="grid">
+    <div class="col">
+      <div class="card">
+        <div class="chips" id="chips" role="group" aria-label="Tarea"></div>
+        <svg class="scene" id="scene" viewBox="0 0 720 490" role="img" aria-label="Maniquí en el puesto de trabajo, vista lateral"></svg>
+        <div class="joints" id="joints"></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+      <div class="card">
+        <h2>Puesto y trabajadora</h2>
+        <div class="controls" style="margin-top:12px">
+          <div class="ctl"><label for="H">Estatura <span id="Hv"></span></label><input id="H" type="range" min="150" max="190" step="1"><small id="Hs"></small></div>
+          <div class="ctl"><label for="tableH">Altura de la mesa <span id="tableHv"></span></label><input id="tableH" type="range" min="75" max="115" step="1"><small id="tableHs"></small></div>
+          <div class="ctl"><label for="reach">Distancia del trabajo al borde de la mesa <span id="reachv"></span></label><input id="reach" type="range" min="20" max="80" step="1"><small>Área normal hasta 45 cm, máxima de 45 a 70 cm.</small></div>
+          <div class="ctl"><label for="shelfH">Altura del estante de insumos <span id="shelfHv"></span></label><input id="shelfH" type="range" min="20" max="150" step="1"><small>Lo frecuente va entre la cadera y el hombro.</small></div>
+          <div class="ctl"><label for="temp">Temperatura en producción <span id="tempv"></span></label><input id="temp" type="range" min="24" max="36" step="1"><small>Arjona 31 a 33 °C durante la visita. Horno a 180 °C.</small></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Mejoras de la propuesta</h2>
+        <div class="toggles" id="toggles" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h2>Resultado frente al As Is</h2>
+        <div class="tiles" id="tiles" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2>Postura por tarea</h2>
+        <p class="note" style="margin:2px 0 10px">Puntaje postural orientativo (tronco, cuello, hombro, muñeca, piernas, carga y repetición). Toca una tarea para verla en el maniquí.</p>
+        <div class="tbars" id="tbars"></div>
+      </div>
+      <div class="card">
+        <h2>Matriz de riesgos</h2>
+        <p class="note" style="margin:2px 0 6px">Probabilidad por severidad, de 1 a 3. De 6 a 9 alto, de 3 a 4 medio, de 1 a 2 bajo. Entre paréntesis, el cambio frente al As Is.</p>
+        <div id="risks"></div>
+      </div>
+      <div class="card">
+        <h2>Carga acumulada en el turno</h2>
+        <p class="note" style="margin:2px 0 8px">Turno de 2 p. m. a 9 p. m. Las pausas activas caen a las 5:30 p. m. y a las 8:30 p. m.</p>
+        <svg class="chart" id="chart" viewBox="0 0 440 210" role="img" aria-label="Curva de carga acumulada durante el turno"></svg>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Configuración actual</span><span><i style="background:var(--steel-dark)"></i>As Is</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="v2" hidden class="grid">
+    <div class="card">
+      <h2>Rutina guiada</h2>
+      <p class="note" style="margin:2px 0 14px">Dos pausas de 5 minutos por turno, lejos del horno y con agua a mano. Cada ejercicio dura de 30 a 40 segundos, sin forzar. Si aparece dolor, se detiene y se consulta con un profesional de salud.</p>
+      <div class="row" style="gap:20px">
+        <div class="ring">
+          <svg viewBox="0 0 140 140" width="140" height="140"><circle cx="70" cy="70" r="62" fill="none" style="stroke:var(--surface2)" stroke-width="10"/><circle id="arc" cx="70" cy="70" r="62" fill="none" style="stroke:var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="389.6" stroke-dashoffset="0" transform="rotate(-90 70 70)"/></svg>
+          <b id="secs">35</b>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="eyebrow" id="exZone">Cuello</div>
+          <h3 id="exName" style="font-size:20px;margin:2px 0 6px">1. Cuello lateral</h3>
+          <p id="exHow" style="margin:0 0 12px"></p>
+          <div class="row">
+            <button class="btn" id="exGo">Iniciar</button>
+            <button class="btn alt" id="exNext">Siguiente</button>
+            <button class="btn alt" id="exReset">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Ejercicios</h2>
+      <ul class="exlist" id="exlist" style="margin-top:12px"></ul>
+    </div>
+  </section>
+
+  <section id="v3" hidden class="grid">
+    <div class="card">
+      <h2>Lista de verificación semanal</h2>
+      <p class="note" style="margin:2px 0 14px">Acciones del área de producción según el plan 5S del informe. Marca lo que ya está hecho.</p>
+      <div class="s5" id="s5"></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h2>Puntaje 5S</h2>
+        <div style="display:flex;align-items:baseline;gap:8px;margin:10px 0 8px"><b id="s5pct" style="font-family:var(--font-display);font-size:40px;line-height:1">0%</b><span id="s5txt" class="foot"></span></div>
+        <div class="meter"><i id="s5bar" style="width:0%"></i></div>
+        <p class="note" id="s5hint"></p>
+      </div>
+      <div class="card">
+        <h2>Evidencia que respalda cada S</h2>
+        <ul style="margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:13px;display:grid;gap:4px">
+          <li>1S: fotos antes y después; número de objetos retirados.</li>
+          <li>2S: siluetas o marcas en la mesa; tiempo de búsqueda de un elemento.</li>
+          <li>3S: lista de verificación diaria firmada.</li>
+          <li>4S: foto estándar en el puesto; formato de inspección.</li>
+          <li>5S: puntaje de la auditoría; registro de pausas activas.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Simulador orientativo construido sobre el informe «Análisis ergonómico y aplicación de las 5S» (UTB, Ingeniería Industrial). Medidas del cuerpo estimadas con proporciones a partir de 163 cm de estatura. La altura de la mesa (100 cm), la del estante (40 cm), la del horno (70 cm) y la distancia de trabajo son supuestos del As Is hasta que se midan en el puesto. El puntaje postural simplifica el método REBA y debe validarse con REBA o RULA y videos de cada tarea.</p>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- Modelo ---------- */
+var D0=12, OVEN_H=70;
+var AS={H:163,tableH:100,reach:60,shelfH:40,temp:32,ventilador:false,guantes:false,repisa:false,kits:false,carro:false,tapete:false,pausas:false,cinco:false,inventario:false};
+var TO={H:163,tableH:93,reach:40,shelfH:100,temp:32,ventilador:true,guantes:true,repisa:true,kits:true,carro:true,tapete:true,pausas:true,cinco:true,inventario:true};
+var TASKS=[
+ {id:'estirar',name:'Estirar y rellenar la masa',kind:'mesa',push:true,rep:0,load:0},
+ {id:'enrollar',name:'Enrollar y cortar cada 5 cm',kind:'mesa',push:false,rep:1,load:0},
+ {id:'moldes',name:'Ubicar rollos en moldes',kind:'mesa',push:false,rep:1,load:0},
+ {id:'horno',name:'Retirar bandeja del horno',kind:'horno',load:2.4,rep:0},
+ {id:'estante',name:'Tomar insumo del estante',kind:'estante',load:1.1,rep:0},
+ {id:'traslado',name:'Llevar bandeja (2,4 kg)',kind:'traslado',load:2.4,rep:0}
+];
+var TOGGLES=[
+ ['ventilador','Ventilador o extractor','Aire en el área de producción.'],
+ ['guantes','Guantes térmicos largos','Para sacar bandejas a 180 °C.'],
+ ['repisa','Repisa de apoyo junto al horno','A la altura de la bandeja.'],
+ ['kits','Kits de pesaje con tara','Hasta 12 actividades menos de 53.'],
+ ['carro','Carro de servicio con freno','Un solo viaje por etapa.'],
+ ['tapete','Tapete antifatiga y silla alta','Alternar sentada en tareas posibles.'],
+ ['pausas','Pausas activas dos veces por turno','5 minutos, lejos del horno.'],
+ ['cinco','1S y 2S aplicadas','Tarjeta roja, siluetas y rotulado.'],
+ ['inventario','Inventario de mínimos y máximos','Junto a la estantería 1.']
+];
+var S=Object.assign({},AS), taskId='estirar', custom=false;
+
+function dims(H){return {H:H,hip:.53*H,Lt:.288*H,ua:.186*H,L2:.146*H+.108*H*.6,elbow:.63*H,eye:.939*H,head:.11*H}}
+function rec(t,H){var e=.63*H; return t.push?[e-20,e-10]:[e-10,e-5]}
+function targetOf(t,s){
+  if(t.kind==='mesa') return {x:D0+s.reach,y:s.tableH+3};
+  if(t.kind==='horno') return {x:D0+32,y:OVEN_H+3};
+  if(t.kind==='estante') return {x:D0+25,y:s.shelfH};
+  return s.carro?{x:D0+40,y:95}:{x:D0+30,y:85};
+}
+function lvlOf(v,max){var r=v/max;return r<=.34?'ok':r<=.67?'warn':'bad'}
+function analyze(t,s){
+  var d=dims(s.H), T=targetOf(t,s), a=d.ua, b=d.L2, th=0, Sx,Sy,D,i;
+  for(i=0;i<=100;i++){
+    var r=i*Math.PI/180; Sx=d.Lt*Math.sin(r); Sy=d.hip+d.Lt*Math.cos(r);
+    D=Math.hypot(T.x-Sx,T.y-Sy); th=i;
+    if(D<=.95*(a+b)) break;
+  }
+  var tr=th*Math.PI/180; Sx=d.Lt*Math.sin(tr); Sy=d.hip+d.Lt*Math.cos(tr);
+  var vx=T.x-Sx, vy=T.y-Sy; D=Math.hypot(vx,vy);
+  var reachMax=a+b-.01, dd=Math.min(D,reachMax), ux=vx/D, uy=vy/D;
+  var Tx=Sx+ux*dd, Ty=Sy+uy*dd;
+  var al=(a*a-b*b+dd*dd)/(2*dd), hh=Math.sqrt(Math.max(0,a*a-al*al));
+  var Px=Sx+ux*al, Py=Sy+uy*al, c1={x:Px-uy*hh,y:Py+ux*hh}, c2={x:Px+uy*hh,y:Py-ux*hh};
+  var E=c1.y<c2.y?c1:c2;
+  // elbow flexion
+  var cosE=(a*a+b*b-dd*dd)/(2*a*b); var elbow=180-Math.acos(Math.max(-1,Math.min(1,cosE)))*180/Math.PI;
+  // shoulder flexion relative to trunk
+  var phi=Math.atan2(E.x-Sx,-(E.y-Sy))*180/Math.PI; var sh=phi+th;
+  // neck
+  var ex=Sx+d.head*Math.sin(tr)+.04*s.H, ey=Sy+d.head*Math.cos(tr)+.03*s.H;
+  var g=Math.atan2(Math.max(0,ey-Ty),Math.max(1,Tx-ex))*180/Math.PI;
+  var nu=Math.max(0,g-32), neck=nu-th;
+  var hx=Sx+d.head*Math.sin(nu*Math.PI/180), hy=Sy+d.head*Math.cos(nu*Math.PI/180);
+  // scores
+  var sT=th<5?1:th<20?2:th<60?3:4;
+  var sN=neck<-5?2:neck<=20?1:neck<=45?2:3;
+  var ash=Math.abs(sh), sS=ash<=20?1:ash<=45?2:ash<=90?3:4;
+  var e=d.elbow;
+  if(t.kind==='mesa' && ((t.push&&Ty>e-5)||(!t.push&&Ty>e-1))) sS=Math.min(4,sS+1);
+  var sW=1;
+  if(t.kind==='mesa'){var rg=rec(t,s.H); if(s.reach>45||s.tableH<rg[0]-4||s.tableH>rg[1]+4) sW=2;}
+  var load=(t.id==='traslado'&&s.carro)?0.3:t.load;
+  var sL=load>2?1:0, sR=t.rep, sG=1+(s.tapete?0:1);
+  var total=sT+sN+sS+sW+sG+sL+sR;
+  var lvl=total<=8?'ok':total<=11?'warn':'bad';
+  return {th:th,S:{x:Sx,y:Sy},E:E,T:{x:Tx,y:Ty},H:{x:hx,y:hy},neck:neck,nu:nu,sh:sh,elbow:elbow,
+    sT:sT,sN:sN,sS:sS,sW:sW,sG:sG,sL:sL,sR:sR,total:total,lvl:lvl,reachOK:D<=reachMax,d:d};
+}
+function levelText(v){return v<=8?'Bajo':v<=11?'Medio':v<=14?'Alto':'Muy alto'}
+function allAnalyses(s){return TASKS.map(function(t){return analyze(t,s)})}
+
+function risks(s){
+  var an=allAnalyses(s), mesa=Math.max(an[0].total,an[1].total,an[2].total);
+  var out=[];
+  var p1=3; if(s.ventilador)p1--; if(s.temp<28)p1--; out.push(['R1','Calor sin ventilación en producción',Math.max(1,p1),2]);
+  var p2=2,s2=3; if(s.repisa)p2=1; if(s.guantes)s2=2; out.push(['R2','Retiro de bandejas calientes',p2,s2]);
+  out.push(['R3','Postura de cuello, hombros y tronco',mesa>=12?3:mesa>=9?2:1,2]);
+  out.push(['R4','Movimientos repetitivos de mano y muñeca',s.pausas?2:3,3]);
+  var p5=2; if(s.tapete)p5--; out.push(['R5','Bipedestación prolongada',Math.max(1,p5),2]);
+  out.push(['R6','Almacenamiento bajo y flexión',(s.shelfH>=80&&s.shelfH<=135)?1:2,2]);
+  out.push(['R7','Cargas y traslados repetidos',s.carro?1:3,1]);
+  out.push(['R8','Desorden de mesas y objetos sueltos',s.cinco?1:2,2]);
+  out.push(['R9','Apremio de tiempo y cambios',s.inventario?1:2,2]);
+  out.push(['R10','Contraste térmico nevera y ambiente',s.temp<=27?1:2,1]);
+  out.push(['R11','Iluminación (309 lux, por verificar)',2,1]);
+  out.push(['R12','Ruido (54 dB)',1,1]);
+  return out.map(function(r){var sc=r[2]*r[3];return {id:r[0],name:r[1],p:r[2],s:r[3],sc:sc,lvl:sc>=6?'bad':sc>=3?'warn':'ok'}});
+}
+function fatigue(s){
+  var an=allAnalyses(s), avg=an.reduce(function(a,x){return a+x.total},0)/an.length;
+  var heat=Math.max(0,s.temp-28)*.05*(s.ventilador?.5:1);
+  var F=0, pts=[], t;
+  for(t=14;t<=21.001;t+=.25){
+    pts.push([t,Math.min(100,F)]);
+    F+=.25*13*(avg/12)*(1+heat);
+    if(s.pausas){ if(Math.abs(t-17.5)<1e-6||Math.abs(t-20.5)<1e-6) F=Math.max(0,F-12); }
+  }
+  return {pts:pts,avg:avg};
+}
+window.__m={analyze:analyze,TASKS:TASKS,AS:AS,TO:TO,risks:risks,fatigue:fatigue};
+
+/* ---------- Escena ---------- */
+var SC=2.2,X0=190,FY=420;
+function X(x){return +(X0+x*SC).toFixed(1)} function Y(y){return +(FY-y*SC).toFixed(1)}
+function col(l){return 'var(--'+l+')'}
+function line(x1,y1,x2,y2,w,c,extra){return '<line x1="'+X(x1)+'" y1="'+Y(y1)+'" x2="'+X(x2)+'" y2="'+Y(y2)+'" stroke-width="'+w+'" stroke-linecap="round" style="stroke:'+c+'" '+(extra||'')+'/>'}
+function rect(x,y,w,h,fill,extra){return '<rect x="'+X(x)+'" y="'+Y(y+h)+'" width="'+(w*SC).toFixed(1)+'" height="'+(h*SC).toFixed(1)+'" style="fill:'+fill+'" '+(extra||'')+'/>'}
+function txt(x,y,s,cls,anchor){return '<text x="'+x+'" y="'+y+'" class="'+cls+'" text-anchor="'+(anchor||'start')+'">'+s+'</text>'}
+
+function scene(){
+  var t=TASKS.filter(function(k){return k.id===taskId})[0], a=analyze(t,S), d=a.d, s=S, o='';
+  // floor
+  o+='<line x1="0" y1="'+FY+'" x2="720" y2="'+FY+'" style="stroke:var(--steel-dark)" stroke-width="2"/>';
+  if(s.tapete) o+=rect(-45,0,100,1.6,col('ok'),'rx="2"');
+  // silla alta
+  o+=line(-50,70,-18,70,3,col('steel-dark'))+line(-50,70,-50,112,3,col('steel-dark'))+line(-34,70,-34,0,3,col('steel-dark'))+line(-48,0,-20,0,3,col('steel-dark'));
+  if(s.tapete) o+=txt(X(-50),Y(116),'Silla alta','lbl');
+  // ventilador
+  if(s.ventilador){
+    o+='<g style="stroke:var(--accent);fill:none" stroke-width="2" stroke-linecap="round">'+
+       '<circle cx="'+X(-62)+'" cy="'+Y(150)+'" r="13"/><path d="M'+X(-62)+' '+Y(150)+' l0 -11 M'+X(-62)+' '+Y(150)+' l9 6 M'+X(-62)+' '+Y(150)+' l-9 6"/>'+
+       '<path d="M'+X(-62)+' '+Y(138)+' v'+(138*0+34)+'"/>'+
+       '<path d="M'+(X(-62)+22)+' '+(Y(150)-6)+' q16 6 32 0 M'+(X(-62)+22)+' '+(Y(150)+6)+' q16 6 32 0" opacity=".6"/></g>';
+  }
+  // elbow height guide
+  o+='<line x1="'+X(-20)+'" x2="'+X(190)+'" y1="'+Y(d.elbow)+'" y2="'+Y(d.elbow)+'" stroke-dasharray="3 5" style="stroke:var(--muted)" opacity=".55"/>';
+  o+=txt(X(-60),Y(d.elbow)-4,'Altura de codo '+Math.round(d.elbow)+' cm','lbl');
+  // mobiliario por tarea
+  var ex=D0;
+  if(t.kind==='mesa'||t.kind==='traslado'){
+    var th=s.tableH;
+    o+=rect(ex,th-4,172,4,col('steel'),'stroke-width="1" style="fill:var(--steel);stroke:var(--steel-dark)"');
+    o+=rect(ex+4,0,3,th-4,col('steel-dark'))+rect(ex+165,0,3,th-4,col('steel-dark'));
+    o+=rect(ex+4,24,164,2.5,col('steel-dark'));
+    if(t.kind==='mesa'){
+      o+=rect(s.reach+D0-3,th,6,5,col('accent'),'rx="1.5"'); // objeto de trabajo
+      o+=rect(ex+130,th,14,7,col('steel-dark'),'rx="1"')+rect(ex+150,th,10,5,col('steel-dark'),'rx="1"');
+    }
+  }
+  if(t.kind==='traslado'){
+    if(s.carro){
+      o+=rect(ex+22,83,60,3,col('accent'))+rect(ex+22,40,60,2.5,col('accent'))+line(ex+22,83,ex+22,98,3,col('accent'))+line(ex+22,98,ex+34,98,3,col('accent'));
+      o+=line(ex+30,40,ex+30,6,2.5,col('accent'))+line(ex+74,40,ex+74,6,2.5,col('accent'));
+      o+='<circle cx="'+X(ex+30)+'" cy="'+Y(4)+'" r="'+4*SC/1.6+'" style="fill:var(--ink)"/><circle cx="'+X(ex+74)+'" cy="'+Y(4)+'" r="'+4*SC/1.6+'" style="fill:var(--ink)"/>';
+      o+=rect(ex+26,86,48,4,col('warn'),'rx="1"');
+    } else o+=rect(a.T.x-8,a.T.y-2,46,4,col('warn'),'rx="1"');
+  }
+  if(t.kind==='horno'){
+    var fx=D0+40;
+    o+=rect(fx,0,120,118,col('steel'),'stroke-width="1" style="fill:var(--steel);stroke:var(--steel-dark)"');
+    o+=rect(fx,OVEN_H-6,100,18,col('ink'),'opacity=".85"');
+    o+=rect(fx-22,OVEN_H,70,3,col('warn'));            // bandeja
+    o+=txt(X(fx)+10,Y(104),'Horno 180 °C','lbl');
+    if(s.repisa){o+=rect(D0+10,OVEN_H-3,30,3,col('ok'));o+=txt(X(D0+6),Y(OVEN_H-14),'Repisa de apoyo','lbl');}
+    if(s.temp>=30){
+      for(var q=0;q<3;q++){var qx=X(fx+25+q*30);o+='<path d="M'+qx+' '+Y(122)+' q6 -8 0 -16 t0 -16" fill="none" stroke-width="2" style="stroke:var(--bad)" opacity=".5"/>'}
+    }
+  }
+  if(t.kind==='estante'){
+    var sx=D0+30;
+    o+=rect(sx,0,3,175,col('steel-dark'))+rect(sx+110,0,3,175,col('steel-dark'));
+    [40,100,150].forEach(function(h){o+=rect(sx,h-2,113,2.5,col('steel'),'style="fill:var(--steel);stroke:var(--steel-dark)"')});
+    o+=rect(sx,s.shelfH-2,113,3,col('accent'));
+    o+=rect(sx+12,s.shelfH+1,16,10,col('warn'),'rx="1.5"')+rect(sx+34,s.shelfH+1,16,10,col('steel-dark'),'rx="1.5"');
+  }
+  // maniquí
+  var tc=col(lvlOf(a.sT,4)), nc=col(lvlOf(a.sN,3)), sc=col(lvlOf(a.sS,4)), wc=col(lvlOf(a.sW,3)), lc=col(lvlOf(a.sG,3));
+  var hip={x:0,y:d.hip}, knee={x:4,y:.285*d.H}, ank={x:0,y:5};
+  o+=line(hip.x,hip.y,knee.x,knee.y,13,lc)+line(knee.x,knee.y,ank.x,ank.y,10,lc);
+  o+=line(-6,2,16,2,5,col('ink'));
+  o+=line(hip.x,hip.y,a.S.x,a.S.y,17,tc);
+  o+=line(a.S.x,a.S.y,a.H.x,a.H.y,6,nc);
+  var hr=.065*d.H*SC;
+  var hcx=X(a.H.x+ (a.H.x-a.S.x)*.35), hcy=Y(a.H.y+ (a.H.y-a.S.y)*.35);
+  o+='<circle cx="'+hcx+'" cy="'+hcy+'" r="'+hr.toFixed(1)+'" style="fill:var(--surface);stroke:'+nc+'" stroke-width="4"/>';
+  o+='<circle cx="'+(+hcx+hr*.5).toFixed(1)+'" cy="'+(+hcy-hr*.1).toFixed(1)+'" r="2" style="fill:var(--ink)"/>';
+  o+=line(a.S.x,a.S.y,a.E.x,a.E.y,9,sc)+line(a.E.x,a.E.y,a.T.x,a.T.y,7,wc);
+  var glove=(t.kind==='horno'&&s.guantes);
+  o+='<circle cx="'+X(a.T.x)+'" cy="'+Y(a.T.y)+'" r="'+(glove?9:6)+'" style="fill:'+(glove?'var(--ok)':wc)+'"/>';
+  o+='<circle cx="'+X(a.S.x)+'" cy="'+Y(a.S.y)+'" r="6" style="fill:var(--surface);stroke:var(--ink)" stroke-width="2"/>';
+  o+='<circle cx="'+X(a.E.x)+'" cy="'+Y(a.E.y)+'" r="4" style="fill:var(--surface);stroke:var(--ink)" stroke-width="2"/>';
+  o+=txt(X(-20),Y(d.hip)+4,'Cadera '+Math.round(d.hip),'lbl','end');
+  // regla de alcance
+  if(t.kind==='mesa'){
+    var by=FY+26;
+    o+='<rect x="'+X(D0)+'" y="'+by+'" width="'+(45*SC)+'" height="9" style="fill:var(--ok)"/><rect x="'+X(D0+45)+'" y="'+by+'" width="'+(25*SC)+'" height="9" style="fill:var(--warn)"/><rect x="'+X(D0+70)+'" y="'+by+'" width="'+(15*SC)+'" height="9" style="fill:var(--bad)"/>';
+    for(var k=0;k<=80;k+=20) o+=txt(X(D0+k),by+24,k,'lbl','middle');
+    var mx=X(D0+s.reach);
+    o+='<path d="M'+(mx-6)+' '+(by-9)+' h12 l-6 8z" style="fill:var(--ink)"/>';
+    o+=txt(X(D0+88),by+8,'Alcance desde el borde, cm','lbl');
+    o+=txt(X(D0+18),by+24+14,'normal','lbl','middle')+txt(X(D0+57),by+24+14,'máxima','lbl','middle');
+    o+=txt(X(D0+22),FY-3,'','lbl');
+  }
+  // regla vertical derecha
+  var rx=668, band=null, mk=null, lab='';
+  if(t.kind==='mesa'){band=rec(t,s.H);mk=s.tableH;lab='Mesa '+s.tableH}
+  else if(t.kind==='estante'){band=[d.hip,.818*s.H];mk=s.shelfH;lab='Estante '+s.shelfH}
+  if(band){
+    o+='<line x1="'+rx+'" x2="'+rx+'" y1="'+Y(40)+'" y2="'+Y(160)+'" style="stroke:var(--steel-dark)" stroke-width="2"/>';
+    for(var h=40;h<=160;h+=20){o+='<line x1="'+(rx-4)+'" x2="'+(rx+4)+'" y1="'+Y(h)+'" y2="'+Y(h)+'" style="stroke:var(--steel-dark)"/>'+txt(rx+8,Y(h)+4,h,'lbl')}
+    o+='<rect x="'+(rx-8)+'" y="'+Y(band[1])+'" width="8" height="'+((band[1]-band[0])*SC)+'" style="fill:var(--ok)" opacity=".85"/>';
+    var inb=mk>=band[0]-.5&&mk<=band[1]+.5;
+    o+='<path d="M'+(rx-14)+' '+Y(mk)+' l9 -5 v10z" style="fill:'+(inb?'var(--ok)':'var(--bad)')+'"/>';
+    o+=txt(rx-16,Y(mk)-8,lab,'lblb','end');
+    o+=txt(rx-14,Y(band[1])-6,'Rango '+Math.round(band[0])+' a '+Math.round(band[1]),'lbl','end');
+  }
+  document.getElementById('scene').innerHTML=o;
+  // articulaciones
+  var J=[['Tronco',Math.round(a.th)+'°',lvlOf(a.sT,4)],['Cuello',Math.round(a.neck)+'°',lvlOf(a.sN,3)],['Hombro',Math.round(Math.abs(a.sh))+'°',lvlOf(a.sS,4)],['Codo',Math.round(a.elbow)+'°',a.elbow>100?'warn':'ok']];
+  document.getElementById('joints').innerHTML=J.map(function(j){return '<div class="joint"><small><i class="dot '+j[2]+'"></i>'+j[0]+'</small><b>'+j[1]+'</b></div>'}).join('');
+  var msgs=[];
+  if(a.sT>=3) msgs.push('El tronco se inclina '+Math.round(a.th)+'° para alcanzar el objeto.');
+  if(a.sN>=2) msgs.push('El cuello queda '+(a.neck<0?'extendido':'flexionado')+' '+Math.abs(Math.round(a.neck))+'°.');
+  if(a.sS>=3) msgs.push('El hombro trabaja elevado o muy adelantado.');
+  if(t.kind==='mesa'){var rg=rec(t,S.H); if(S.tableH<rg[0]-.5||S.tableH>rg[1]+.5) msgs.push('La mesa queda fuera del rango recomendado ('+Math.round(rg[0])+' a '+Math.round(rg[1])+' cm).'); if(S.reach>45) msgs.push('El objeto está fuera del área normal.')}
+  if(t.id==='estante'&&(S.shelfH<80||S.shelfH>135)) msgs.push('El estante está fuera de la franja entre cadera y hombro.');
+  if(t.id==='horno'&&!S.repisa) msgs.push('Sin repisa de apoyo, la bandeja a 180 °C se sostiene en el aire.');
+  var v=document.getElementById('verdict'); v.className='verdict '+a.lvl;
+  v.innerHTML='<i class="dot '+a.lvl+'"></i><div><b>Puntaje postural '+a.total+', nivel '+levelText(a.total).toLowerCase()+'.</b> '+(msgs.length?msgs.join(' '):'Postura cercana a la neutra para esta tarea.')+'</div>';
+}
+
+/* ---------- Paneles ---------- */
+function panels(){
+  var base=risks(AS), cur=risks(S);
+  var hiB=base.filter(function(r){return r.lvl==='bad'}).length, hiC=cur.filter(function(r){return r.lvl==='bad'}).length;
+  var anB=allAnalyses(AS), anC=allAnalyses(S);
+  var mB=Math.max.apply(null,anB.map(function(x){return x.total})), mC=Math.max.apply(null,anC.map(function(x){return x.total}));
+  var fB=fatigue(AS), fC=fatigue(S), eB=fB.pts[fB.pts.length-1][1], eC=fC.pts[fC.pts.length-1][1];
+  var acts=S.kits?41:53;
+  function tile(l,v,sub,c){return '<div class="tile"><small>'+l+'</small><b style="color:var(--'+c+')">'+v+'</b> <i>'+sub+'</i></div>'}
+  document.getElementById('tiles').innerHTML=
+    tile('Riesgos altos',hiC,'de 12 · As Is '+hiB,hiC<hiB?'ok':hiC>hiB?'bad':'ink')+
+    tile('Peor postura',mC,levelText(mC)+' · As Is '+mB,mC<mB?'ok':mC>mB?'bad':'ink')+
+    tile('Carga a las 9 p. m.',Math.round(eC)+'%','As Is '+Math.round(eB)+'%',eC<eB?'ok':eC>eB?'bad':'ink')+
+    tile('Actividades por lote',acts,S.kits?'potencial, a validar':'diagrama actual','ink');
+  document.getElementById('risks').innerHTML=cur.map(function(r,i){
+    var dl=r.sc-base[i].sc, ds=dl===0?'':' ('+(dl>0?'+':'')+dl+')';
+    return '<div class="risk '+r.lvl+'" style="--c:var(--'+r.lvl+')"><span class="id">'+r.id+'</span><span class="nm">'+r.name+' <span class="delta">'+r.p+'×'+r.s+ds+'</span></span><span class="sc">'+r.sc+'</span><div class="bar"><i style="width:'+(r.sc/9*100)+'%"></i></div></div>';
+  }).join('');
+  document.getElementById('tbars').innerHTML=TASKS.map(function(t,i){
+    var x=anC[i]; return '<div class="tb" data-task="'+t.id+'" style="cursor:pointer;--c:var(--'+x.lvl+')"><span>'+t.name+'</span><div class="bar"><i style="width:'+((x.total-4)/14*100)+'%"></i></div><b>'+x.total+'</b></div>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.tb'),function(el){el.onclick=function(){taskId=el.getAttribute('data-task');render()}});
+  chart(fB,fC);
+}
+function chart(fB,fC){
+  var W=440,Hh=210,l=34,r=24,t=18,b=28,pw=W-l-r,ph=Hh-t-b;
+  function cx(h){return l+(h-14)/7*pw} function cy(v){return t+ph-(v/100)*ph}
+  var o='';
+  [0,25,50,75,100].forEach(function(v){o+='<line x1="'+l+'" x2="'+(W-r)+'" y1="'+cy(v)+'" y2="'+cy(v)+'" style="stroke:var(--line)"/>'+'<text x="'+(l-6)+'" y="'+(cy(v)+4)+'" class="lbl" text-anchor="end">'+v+'</text>'});
+  [14,16,18,20,21].forEach(function(h){var lab=(h>12?h-12:h)+' p. m.';o+='<text x="'+cx(h)+'" y="'+(Hh-8)+'" class="lbl" text-anchor="middle">'+lab+'</text>'});
+  if(S.pausas)[17.5,20.5].forEach(function(h){o+='<line x1="'+cx(h)+'" x2="'+cx(h)+'" y1="'+t+'" y2="'+(t+ph)+'" stroke-dasharray="3 4" style="stroke:var(--ok)"/>'});
+  function path(f){return f.pts.map(function(p,i){return (i?'L':'M')+cx(p[0]).toFixed(1)+' '+cy(p[1]).toFixed(1)}).join(' ')}
+  o+='<path d="'+path(fB)+'" fill="none" stroke-width="2" stroke-dasharray="5 4" style="stroke:var(--steel-dark)"/>';
+  o+='<path d="'+path(fC)+' L'+cx(21)+' '+cy(0)+' L'+cx(14)+' '+cy(0)+'Z" style="fill:var(--accent)" opacity=".13"/>';
+  o+='<path d="'+path(fC)+'" fill="none" stroke-width="2.5" style="stroke:var(--accent)"/>';
+  var e=fC.pts[fC.pts.length-1];
+  o+='<circle cx="'+cx(e[0])+'" cy="'+cy(e[1])+'" r="4" style="fill:var(--accent)"/>';
+  o+='<text x="'+(cx(e[0])-8)+'" y="'+(cy(e[1])-8)+'" class="lblb" text-anchor="end">'+Math.round(e[1])+'%</text>';
+  document.getElementById('chart').innerHTML=o;
+}
+
+/* ---------- Controles ---------- */
+function build(){
+  document.getElementById('chips').innerHTML=TASKS.map(function(t){return '<button class="chip" data-id="'+t.id+'" aria-pressed="false">'+t.name+'</button>'}).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(b){b.onclick=function(){taskId=b.getAttribute('data-id');render()}});
+  document.getElementById('toggles').innerHTML=TOGGLES.map(function(g){return '<label class="tg"><input type="checkbox" id="tg_'+g[0]+'"><span><b>'+g[1]+'</b><small>'+g[2]+'</small></span></label>'}).join('');
+  ['H','tableH','reach','shelfH','temp'].forEach(function(k){document.getElementById(k).oninput=function(e){S[k]=+e.target.value;custom=true;render()}});
+  TOGGLES.forEach(function(g){document.getElementById('tg_'+g[0]).onchange=function(e){S[g[0]]=e.target.checked;custom=true;render()}});
+  document.getElementById('pAs').onclick=function(){S=Object.assign({},AS);custom=false;render()};
+  document.getElementById('pTo').onclick=function(){S=Object.assign({},TO);custom=false;render()};
+}
+function sync(){
+  ['H','tableH','reach','shelfH','temp'].forEach(function(k){document.getElementById(k).value=S[k]});
+  TOGGLES.forEach(function(g){document.getElementById('tg_'+g[0]).checked=S[g[0]]});
+  document.getElementById('Hv').textContent=S.H+' cm';
+  document.getElementById('tableHv').textContent=S.tableH+' cm';
+  document.getElementById('reachv').textContent=S.reach+' cm';
+  document.getElementById('shelfHv').textContent=S.shelfH+' cm';
+  document.getElementById('tempv').textContent=S.temp+' °C';
+  var d=dims(S.H), t=TASKS.filter(function(k){return k.id===taskId})[0];
+  document.getElementById('Hs').textContent='Altura de codo '+Math.round(d.elbow)+' cm. Carmen mide 163 cm.';
+  var rl=rec(TASKS[0],S.H), rn=rec(TASKS[1],S.H);
+  document.getElementById('tableHs').textContent='Recomendado: '+Math.round(rn[0])+' a '+Math.round(rn[1])+' cm para trabajo ligero y '+Math.round(rl[0])+' a '+Math.round(rl[1])+' cm para estirar.';
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-id')===taskId)});
+  var isAs=!custom&&JSON.stringify(S)===JSON.stringify(AS), isTo=!custom&&JSON.stringify(S)===JSON.stringify(TO);
+  document.getElementById('pAs').setAttribute('aria-pressed',isAs); document.getElementById('pTo').setAttribute('aria-pressed',isTo);
+}
+function render(){sync();scene();panels()}
+
+/* ---------- Tabs y tema ---------- */
+var tabs=['t1','t2','t3'], views=['v1','v2','v3'];
+tabs.forEach(function(id,i){document.getElementById(id).onclick=function(){
+  tabs.forEach(function(x,j){document.getElementById(x).setAttribute('aria-selected',i===j);document.getElementById(views[j]).hidden=(i!==j)});
+}});
+var root=document.documentElement;
+document.getElementById('themeBtn').onclick=function(){
+  var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme',dark?'light':'dark');
+};
+
+/* ---------- Pausas activas ---------- */
+var EX=[
+ ['Cuello lateral','Cuello','Inclinar la oreja hacia el hombro, un lado y luego el otro, con la espalda recta.'],
+ ['Círculos de hombros','Hombros','Subir y llevar los hombros hacia atrás, en círculos lentos.'],
+ ['Muñecas y dedos','Manos y muñecas','Brazo estirado, palma abajo y luego arriba, llevando suavemente los dedos hacia el cuerpo; abrir y cerrar las manos.'],
+ ['Inclinación lateral','Espalda','Manos en la cintura o brazo sobre la cabeza, inclinar el tronco hacia cada lado.'],
+ ['Extensión de espalda','Espalda baja','Manos en la zona lumbar y llevar el pecho hacia adelante y arriba, con suavidad.'],
+ ['Talones y tobillos','Piernas','Elevarse sobre las puntas y bajar; girar los tobillos.']
+];
+var exI=0, left=35, timer=null, DUR=35;
+function exRender(){
+  var e=EX[exI];
+  document.getElementById('exName').textContent=(exI+1)+'. '+e[0];
+  document.getElementById('exZone').textContent=e[1];
+  document.getElementById('exHow').textContent=e[2];
+  document.getElementById('secs').textContent=left;
+  document.getElementById('arc').setAttribute('stroke-dashoffset',(389.6*(1-left/DUR)).toFixed(1));
+  document.getElementById('exGo').textContent=timer?'Pausar':'Iniciar';
+  document.getElementById('exlist').innerHTML=EX.map(function(x,i){return '<li data-i="'+i+'" '+(i===exI?'aria-current="true"':'')+'><span class="n">'+(i+1)+'</span><span>'+x[0]+'</span><span class="z">'+x[1]+'</span></li>'}).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('#exlist li'),function(li){li.onclick=function(){exI=+li.getAttribute('data-i');left=DUR;exRender()}});
+}
+function exStop(){if(timer){clearInterval(timer);timer=null}}
+function exNext(){exI=(exI+1)%EX.length;left=DUR;exRender()}
+document.getElementById('exGo').onclick=function(){
+  if(timer){exStop();exRender();return}
+  timer=setInterval(function(){left--;if(left<=0){if(exI===EX.length-1){exStop();left=DUR;exI=0}else{exNext()}}exRender()},1000);exRender();
+};
+document.getElementById('exNext').onclick=function(){exNext()};
+document.getElementById('exReset').onclick=function(){exStop();exI=0;left=DUR;exRender()};
+
+/* ---------- Auditoría 5S ---------- */
+var S5=[
+ ['1S Seiri','Selección',['Retirar de las mesas envolturas, empaques sueltos y utensilios que no se usan a diario','Clasificar en necesarios, ocasionales e innecesarios, con tarjeta roja','Revisar insumos vencidos en la nevera y la estantería']],
+ ['2S Seiton','Orden',['Lugar fijo para báscula, tabla, moldes y utensilios, con siluetas o marcas','Canastillas y estantes rotulados','Lo más usado entre la cadera y el hombro','Zona de kits de pesaje creada']],
+ ['3S Seiso','Limpieza',['Limpiar mesas, estantes, báscula, amasadora y horno al inicio y al final del turno','Plan semanal de limpieza profunda','Lista de verificación diaria firmada']],
+ ['4S Seiketsu','Estandarizar',['Foto estándar de cada mesa en orden, en el puesto','Rotulación por colores','Procedimiento del kit de pesaje y del manejo de bandejas calientes','Formato de inventario de mínimos y máximos']],
+ ['5S Shitsuke','Disciplina',['Auditoría corta semanal con la lista','Pausas activas dentro de la jornada','Revisión mensual de los estándares']]
+];
+var chk={}; try{chk=JSON.parse(localStorage.getItem('ergonauta5s')||'{}')}catch(e){chk={}}
+function s5Render(){
+  var total=0,done=0;
+  document.getElementById('s5').innerHTML=S5.map(function(g,gi){
+    return '<div><h3>'+g[0]+' <span>'+g[1]+'</span></h3><div class="toggles" style="grid-template-columns:minmax(0,1fr);margin-top:8px">'+g[2].map(function(it,ii){
+      var k=gi+'_'+ii; total++; if(chk[k])done++;
+      return '<label class="tg"><input type="checkbox" data-k="'+k+'" '+(chk[k]?'checked':'')+'><span><small style="color:var(--ink);font-size:13px">'+it+'</small></span></label>';
+    }).join('')+'</div></div>';
+  }).join('');
+  var pct=Math.round(done/total*100);
+  document.getElementById('s5pct').textContent=pct+'%';
+  document.getElementById('s5bar').style.width=pct+'%';
+  document.getElementById('s5txt').textContent=done+' de '+total+' acciones';
+  document.getElementById('s5hint').textContent=pct===100?'Estándares completos. Mantén la auditoría semanal.':pct>=60?'Buen avance. Cierra primero las acciones de 3S y 4S pendientes.':'Empieza por 1S y 2S: son la base del recorrido corto y del orden en la mesa.';
+  Array.prototype.forEach.call(document.querySelectorAll('#s5 input'),function(i){i.onchange=function(){chk[i.getAttribute('data-k')]=i.checked;try{localStorage.setItem('ergonauta5s',JSON.stringify(chk))}catch(e){}s5Render()}});
+}
+
+build();render();exRender();s5Render();
+})();
+</script>
+
+</body></html>
